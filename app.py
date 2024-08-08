@@ -62,10 +62,10 @@ def convert_uploaded_file(uploaded_file):
         OCR_Extractor.convert_to_image(uploaded_file)
 
 st.set_page_config(page_title="Quotation Modelling")
-st.header("quotation automation")
+st.header("Industrial AI - Modeling Engine")
 uploaded_file = st.file_uploader("Upload a PDF",type=["pdf"])
 
-submit = st.button("Get Quotation")
+submit = st.button("Get Product Recommendations")
 if submit:
     convert_uploaded_file(uploaded_file)
     files = os.listdir("data/images")
@@ -83,5 +83,18 @@ if submit:
     for res in result:
         extracted_items.extend(res.split("\n"))
     mapping.faiss_filter_products(extracted_items)
+    # while not os.path.isfile("result/reranked_products.txt"):
+    #     with st.spinner('In Progress...'):
+    #         time.sleep(5)
+    st.success("Done!")
+    with open("result/reranked_products.txt",'r') as file:
+        st.download_button(
+            label= "Download Product Recommendations",
+            data = file,
+            file_name = "product_recommendation.txt",
+            mime = "text"
+        )
+
+
 
 
