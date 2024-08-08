@@ -4,16 +4,20 @@ import faiss
 import numpy as np
 from huggingface_hub import login
 import os
-# login(token = os.getenv("HUGGINGFACE_TOKEN"))
+
+## Bi-encoder model to retrieve top 20 results from FAISS database
 model = SentenceTransformer("Snowflake/snowflake-arctic-embed-m-v1.5",model_kwargs=dict(add_pooling_layer = False))  #sentence-transformers/all-MiniLM-L6-v2
+
+## Cross-encoder to rerank the results that we recieve from biencoder model
 cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-12-v2',revision=None)
+
+
 product_db = pd.read_csv("data/productDB.csv")
+
+## Create and store embeddings of productDB.csv in a FAISS vector database.
 if not os.path.isfile("data/product_embeddings.index"):
     desc1 = product_db.iloc[:, 2].tolist()
     desc2 = product_db.iloc[:, 3].tolist()
-    # desc3 = product_db.iloc[:, 5].tolist()
-    # desc4 = product_db.iloc[:, 6].tolist()
-    # desc5 = product_db.iloc[:, 7].tolist()
     product_descriptions = [f"{des1}, {des2}" for des1, des2 in
                             zip(desc1, desc2)]
     product_embeddings = model.encode(product_descriptions)
@@ -25,6 +29,12 @@ if not os.path.isfile("data/product_embeddings.index"):
 index = faiss.read_index('data/product_embeddings.index')
 
 def faiss_filter_products(request_items,k=20):
+    """
+    Filter products from FAISS database based on the requested items by the user. Filter is based on semantic search.
+    :param request_items: list of items requested by the user
+    :param k: Top k item will be retrieved
+    :return: None
+    """
     with open("result/requested_items.txt",'w') as f:
         f.writelines([item+'\n' for item in request_items])
     request_items_embeddings = model.encode(request_items,prompt_name="query")
@@ -50,6 +60,13 @@ def faiss_filter_products(request_items,k=20):
         rerank_products(item,cross_enc_desc,top_20_string)
 
 def rerank_products(request_item,top_n_descriptions,top_20_string):
+    """
+    Use the cross encoder to rerank the products.
+    :param request_item: list of items requested by the user
+    :param top_n_descriptions: description of top 20 products
+    :param top_20_string: complete description of top 20 products.
+    :return: None
+    """
     pairs = [[request_item,desc] for desc in top_n_descriptions]
     scores = cross_encoder.predict(pairs)
     sorted_indices = np.argsort(scores)[::-1][:10]
@@ -59,6 +76,13 @@ def rerank_products(request_item,top_n_descriptions,top_20_string):
             f.write(top_20_string[idx])
 
 def get_product_recommendations(input_file,k=20):
+    """
+    generate product recommendations from csv
+    :param input_file: csv file containing product recommendations
+    :param k: top k recommendations will be retrieved from biencoder
+    :return: None
+    """
+
     order_request = pd.read_csv(input_file)
     #####################
     # Convert request_items into a list
