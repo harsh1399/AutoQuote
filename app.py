@@ -8,8 +8,7 @@ import pathlib
 import time
 from PIL import Image
 from concurrent.futures import ThreadPoolExecutor
-import faiss
-from sentence_transformers i
+import mapping
 
 genai.configure(api_key = os.getenv("GOOGLE_API_KEY"))
 model = genai.GenerativeModel('gemini-1.5-flash',
@@ -83,6 +82,6 @@ if submit:
     extracted_items = []
     for res in result:
         extracted_items.extend(res.split("\n"))
-
+    mapping.faiss_filter_products(extracted_items)
 
 
