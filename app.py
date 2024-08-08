@@ -87,7 +87,7 @@ if submit:
     #     with st.spinner('In Progress...'):
     #         time.sleep(5)
     st.success("Done!")
-    with open("result/reranked_products.txt",'r') as file:
+    with open("result/top-10-products.txt",'r') as file:
         st.download_button(
             label= "Download Product Recommendations",
             data = file,

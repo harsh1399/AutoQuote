@@ -53,7 +53,22 @@ def rerank_products(request_item,top_n_descriptions,top_20_string):
     pairs = [[request_item,desc] for desc in top_n_descriptions]
     scores = cross_encoder.predict(pairs)
     sorted_indices = np.argsort(scores)[::-1][:10]
-    with open("result/reranked_products.txt",'a') as f:
+    with open("result/top-10-products.txt",'a') as f:
         f.write(f"\n---------{request_item}---------\n")
         for idx in sorted_indices:
             f.write(top_20_string[idx])
+
+def get_product_recommendations(input_file,k=20):
+    order_request = pd.read_csv(input_file)
+    #####################
+    # Convert request_items into a list
+
+    # request_items = order_request.iloc[:,0].tolist()
+    ###################
+
+    ## uncomment the below code after converting into a list of items
+
+    #faiss_filter_products(request_items,k)
+    """
+    This will create a file called "top-10-products.txt" that contains top 10 recommendations for each item requested.
+    """
