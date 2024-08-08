@@ -1,6 +1,6 @@
 #### To run the mapping code with a csv file - 
 
-Mapping is a standalone file. It has a function "get_product_recommendations" that takes csv input file. The request items from the csv needs to be converted into a list after which it can be used to get recommendations.
+mapping.py is a standalone file. It has a function "get_product_recommendations" that takes csv input file. The request items from the csv needs to be converted into a list after which it can be used to get recommendations.
 
 ```
 def get_product_recommendations(input_file,k=20):
